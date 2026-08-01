@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nico Tech CBA — Técnico en Telefonía</title>
+  <meta name="description" content="Reparación de celulares en Córdoba Capital. Cambio de pantalla, batería, puerto de carga y más. Presupuesto al instante y seguimiento de tu orden online."/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#inicio" class="nav-logo">Nico<span>Tech</span> CBA</a>
+  <ul class="nav-links">
+    <li><a href="#servicios">Servicios</a></li>
+    <li><a href="#calculadora">Calculadora</a></li>
+    <li><a href="#seguimiento">Seguimiento</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="inicio">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow-pink"></div>
+
+  <!-- Detalle de fondo estilo circuito, inspirado en la tarjeta de Nico -->
+  <svg class="circuit-decor top-right" viewBox="0 0 480 480" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M480 60 H340 V140 H260 V220" stroke="#00d4ff" stroke-width="1.5" opacity="0.35"/>
+    <path d="M480 160 H400 V260 H300" stroke="#ff3ec8" stroke-width="1.5" opacity="0.3"/>
+    <path d="M420 0 V60" stroke="#00d4ff" stroke-width="1.5" opacity="0.35"/>
+    <path d="M300 260 V340 H220" stroke="#ff3ec8" stroke-width="1.5" opacity="0.25"/>
+    <circle cx="340" cy="60" r="4" fill="#00d4ff" opacity="0.5"/>
+    <circle cx="260" cy="220" r="4" fill="#00d4ff" opacity="0.5"/>
+    <circle cx="300" cy="260" r="4" fill="#ff3ec8" opacity="0.45"/>
+    <circle cx="220" cy="340" r="4" fill="#ff3ec8" opacity="0.4"/>
+    <circle cx="420" cy="0" r="3" fill="#00d4ff" opacity="0.4"/>
+  </svg>
+
+  <div class="hero-content">
+    <div class="hero-badge">Técnico certificado · Córdoba</div>
+    <h1>Reparaciones<br>que <span class="accent">funcionan</span></h1>
+    <p>Servicio técnico profesional en telefonía. Diagnóstico preciso, repuestos de calidad y garantía en cada trabajo.</p>
+    <div class="hero-cta">
+      <a href="#contacto" class="btn-primary">Solicitar turno</a>
+      <a href="#calculadora" class="btn-secondary">Ver precios</a>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- SERVICIOS -->
+<section id="servicios">
+  <div class="section-label">Lo que hacemos</div>
+  <div class="section-title">Servicios disponibles</div>
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-icon">📱</div>
+      <h3>Cambio de pantalla</h3>
+      <p>Reemplazo de display y táctil en todas las marcas. Samsung, Motorola, Xiaomi y más.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🔋</div>
+      <h3>Cambio de batería</h3>
+      <p>Baterías originales y compatibles de alta calidad. Recuperá la autonomía de tu equipo.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">💧</div>
+      <h3>Daño por líquido</h3>
+      <p>Limpieza ultrasónica y recuperación de equipos mojados. Diagnóstico sin cargo.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🔌</div>
+      <h3>Puerto de carga</h3>
+      <p>Reparación y cambio de conectores USB-C en todas las gamas.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">📷</div>
+      <h3>Cámara y audio</h3>
+      <p>Reemplazo de módulos de cámara, auriculares y micrófono.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">⚙️</div>
+      <h3>Diagnóstico técnico</h3>
+      <p>Revisión completa del equipo, sin costo si se realiza la reparación.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- CALCULADORA -->
+<section id="calculadora">
+  <div class="calc-wrapper">
+    <div class="section-label">Cotizá tu reparación</div>
+    <div class="section-title">Calculadora de presupuesto</div>
+
+    <div class="calc-help">
+      <div class="calc-help-icon">💡</div>
+      <p>Es fácil: elegí la <strong>marca</strong> de tu celular, después el <strong>modelo</strong> y por último qué querés arreglar. En segundos vas a ver el precio estimado y un botón para confirmar por WhatsApp.</p>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-steps" id="calcSteps">
+        <div class="calc-step">
+          <div class="calc-step-label"><span class="calc-step-num">1</span> Marca</div>
+          <select id="sel-marca" onchange="filtrarModelos()" disabled>
+            <option value="">— Cargando marcas… —</option>
+          </select>
+        </div>
+        <div class="calc-step">
+          <div class="calc-step-label"><span class="calc-step-num">2</span> Modelo</div>
+          <select id="sel-modelo" onchange="filtrarReparaciones()" disabled>
+            <option value="">— Primero elegí marca —</option>
+          </select>
+        </div>
+        <div class="calc-step">
+          <div class="calc-step-label"><span class="calc-step-num">3</span> Reparación</div>
+          <select id="sel-rep" onchange="mostrarPrecio()" disabled>
+            <option value="">— Primero elegí modelo —</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="calc-results">
+        <div class="calc-loading" id="calcLoading" style="display:none;">⏳ Cargando lista de precios…</div>
+        <div class="calc-empty" id="emptyState">Elegí marca, modelo y reparación para ver el precio.</div>
+        <div id="resultadoCliente" style="display:none;padding:2rem;text-align:center;">
+          <div style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.8rem;">Precio estimado de la reparación</div>
+          <div id="precioMostrado" style="font-family:'Syne',sans-serif;font-size:3rem;font-weight:800;color:var(--accent);letter-spacing:-0.02em;"></div>
+          <div id="descripcionRep" style="margin-top:0.5rem;color:var(--muted);font-size:0.9rem;"></div>
+          <div style="margin-top:1.5rem;padding:1rem;background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.12);border-radius:6px;font-size:0.82rem;color:var(--muted);line-height:1.6;">
+            💡 Este precio es orientativo. Confirmá el presupuesto definitivo con Nico antes de la reparación.
+          </div>
+          <a id="btnWsp" href="#" target="_blank"
+            style="display:inline-block;margin-top:1.2rem;background:var(--accent);color:#000;padding:0.75rem 1.8rem;border-radius:4px;font-weight:500;text-decoration:none;font-size:0.9rem;transition:background 0.2s;"
+            onmouseover="this.style.background='#33ddff'" onmouseout="this.style.background='var(--accent)'">
+            💬 Confirmar por WhatsApp
+          </a>
+        </div>
+        <div id="sinDatos" style="display:none;padding:2rem;text-align:center;color:var(--muted);font-size:0.875rem;">
+          ⚠️ Todavía no tenemos precio cargado para esa combinación. Escribinos por WhatsApp y te cotizamos directamente.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- SEGUIMIENTO DE ÓRDENES (CLIENTE) -->
+<section id="seguimiento">
+  <div class="section-label">Consultá tu reparación</div>
+  <div class="section-title">Seguimiento de orden</div>
+
+  <div class="tracking-box">
+    <div class="tracking-search">
+      <p>Ingresá tu número de orden para ver el estado de tu reparación.</p>
+      <div class="tracking-input-row">
+        <input type="text" id="trackInput" placeholder="Ej: NT-0001" maxlength="8"
+          oninput="this.value = this.value.toUpperCase()"
+          onkeydown="if(event.key==='Enter') buscarOrden()"/>
+        <button class="btn-track" id="btnBuscarOrden" onclick="buscarOrden()">Buscar</button>
+      </div>
+    </div>
+    <div class="tracking-result">
+      <div class="tracking-empty" id="trackLoading" style="display:none;">⏳ Buscando tu orden…</div>
+      <div class="tracking-empty" id="trackEmpty">Ingresá tu número de orden arriba ↑</div>
+      <div id="trackNotFound" style="display:none;text-align:center;color:#f87171;font-size:0.875rem;padding:1rem 0;">
+        No se encontró ninguna orden con ese número. Verificá que esté bien escrito.
+      </div>
+      <div id="trackFound" style="display:none;"></div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- CONTACTO -->
+<section id="contacto" style="position:relative;overflow:hidden;">
+  <svg class="circuit-decor bottom-left" viewBox="0 0 420 420" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M0 340 H120 V260 H200 V180" stroke="#ff3ec8" stroke-width="1.5" opacity="0.28"/>
+    <path d="M0 240 H80 V140 H180" stroke="#00d4ff" stroke-width="1.5" opacity="0.3"/>
+    <circle cx="120" cy="260" r="4" fill="#ff3ec8" opacity="0.4"/>
+    <circle cx="200" cy="180" r="4" fill="#ff3ec8" opacity="0.4"/>
+    <circle cx="80" cy="140" r="4" fill="#00d4ff" opacity="0.45"/>
+  </svg>
+
+  <div class="section-label">Escribinos</div>
+  <div class="section-title">Contacto</div>
+  <div class="contact-grid">
+    <div class="contact-info">
+      <h3>¿Necesitás reparar tu equipo?</h3>
+      <p>Contactame por WhatsApp o completá el formulario. Respondo rápido y coordinamos el turno que mejor te quede.</p>
+
+      <div class="contact-item">
+        <div class="contact-item-icon">💬</div>
+        <div class="contact-item-text">
+          <strong>WhatsApp</strong>
+          <a href="https://wa.me/5493512836584" target="_blank">+54 9 351 2836584</a>
+        </div>
+      </div>
+
+      <div class="contact-item">
+        <div class="contact-item-icon">📍</div>
+        <div class="contact-item-text">
+          <strong>Zona de atención</strong>
+          <span>Córdoba Capital y alrededores</span>
+        </div>
+      </div>
+
+      <div class="contact-item">
+        <div class="contact-item-icon">🕐</div>
+        <div class="contact-item-text">
+          <strong>Horario</strong>
+          <span>Lunes a sábado · 9 a 20 hs</span>
+        </div>
+      </div>
+
+      <div class="contact-item">
+        <div class="contact-item-icon">📧</div>
+        <div class="contact-item-text">
+          <strong>Email</strong>
+          <a href="mailto:nicotechcba@gmail.com">nicotechcba@gmail.com</a>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="contact-form">
+        <div class="form-field">
+          <label>Nombre</label>
+          <input type="text" id="ctNombre" placeholder="Tu nombre"/>
+          <span class="form-hint">Contanos cómo te llamás.</span>
+        </div>
+        <div class="form-field">
+          <label>Teléfono o email</label>
+          <input type="text" id="ctContacto" placeholder="¿Cómo te contactamos?"/>
+          <span class="form-hint">Necesitamos un dato de contacto.</span>
+        </div>
+        <div class="form-field">
+          <label>¿Qué equipo tenés?</label>
+          <input type="text" id="ctEquipo" placeholder="Ej: Samsung A54, Motorola G84…"/>
+        </div>
+        <div class="form-field">
+          <label>Describí el problema</label>
+          <textarea id="ctProblema" placeholder="Contanos qué le pasa al celular…"></textarea>
+        </div>
+        <button class="btn-send" onclick="enviarConsulta()">Enviar consulta →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>© 2026 <strong>Nico Tech CBA</strong> · Técnico en Telefonía · Córdoba, Argentina</div>
+  <div style="display:flex;align-items:center;gap:1.5rem;">
+    <span>Hecho con ♥ en CBA</span>
+    <a href="admin.html" style="font-size:0.7rem;color:var(--border);text-decoration:none;letter-spacing:0.06em;transition:color 0.2s;"
+       onmouseover="this.style.color='var(--muted)'" onmouseout="this.style.color='var(--border)'">·</a>
+  </div>
+</footer>
+
+<script type="module" src="js/calculadora.js"></script>
+<script type="module" src="js/seguimiento.js"></script>
+<script src="js/contacto.js"></script>
+</body>
+</html>
