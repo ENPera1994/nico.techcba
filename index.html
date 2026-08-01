@@ -101,8 +101,7 @@
 
     <div class="calc-help">
       <div class="calc-help-icon">💡</div>
-      <p>Es fácil: elegí la <strong>marca</strong> de tu celular, después el <strong>modelo</strong> y por último qué querés arreglar. En segundos vas a ver el precio estimado y un botón para confirmar por WhatsApp.</p>
-    </div>
+<p>Es fácil: elegí la <strong>marca</strong> de tu celular, después el <strong>modelo</strong> y por último qué querés arreglar. En segundos vas a ver el precio estimado y un botón para confirmar por WhatsApp. <strong>¿Tenés un iPhone?</strong> Escribinos directo por <a href="https://wa.me/5493512836584" target="_blank" style="color:var(--accent);">WhatsApp</a> para cotizarlo</p>    </div>
 
     <div class="calc-box">
       <div class="calc-steps" id="calcSteps">
@@ -172,6 +171,17 @@
       <div class="tracking-empty" id="trackEmpty">Ingresá tu número de orden arriba ↑</div>
       <div id="trackNotFound" style="display:none;text-align:center;color:#f87171;font-size:0.875rem;padding:1rem 0;">
         No se encontró ninguna orden con ese número. Verificá que esté bien escrito.
+      </div>
+      <div id="trackDniStep" style="display:none;text-align:center;padding:1rem 0;">
+        <p style="color:var(--muted);font-size:0.9rem;margin-bottom:1rem;">Para tu seguridad, confirmá el DNI que dejaste al ingresar el equipo.</p>
+        <div class="tracking-input-row">
+          <input type="text" id="trackDniInput" placeholder="DNI sin puntos" inputmode="numeric" maxlength="10"
+            onkeydown="if(event.key==='Enter') verificarDni()"/>
+          <button class="btn-track" onclick="verificarDni()">Verificar</button>
+        </div>
+        <div id="trackDniError" style="display:none;color:#f87171;font-size:0.82rem;margin-top:0.8rem;">
+          El DNI no coincide con el registrado para esa orden.
+        </div>
       </div>
       <div id="trackFound" style="display:none;"></div>
     </div>

@@ -4,13 +4,24 @@
 // Cada orden se guarda en Firestore con su número (ej: "0001") como ID
 // del documento, así el cliente puede consultarla con una lectura directa
 // (permitida por las reglas de seguridad) sin poder listar el resto de
-// las órdenes ni ver datos de otros clientes.
+// las órdenes. Como paso extra de privacidad, antes de mostrar el detalle
+// le pedimos al cliente que confirme el DNI que dejó cargado en el local.
+//
+// Ojo: esta verificación es a nivel de interfaz (evita que alguien vea
+// el detalle de otro cliente por error o con el número al pasar). No es
+// una barrera a nivel de base de datos: alguien que abra las herramientas
+// de desarrollador del navegador podría ver igual la respuesta cruda del
+// servidor. Para un negocio de este tamaño alcanza y sobra, pero si en
+// algún momento querés blindarlo del todo, avisame y lo resolvemos
+// cambiando cómo se guarda el número de orden en la base.
 
 import { db } from './firebase-config.js';
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 const ORDEN_PREFIX = 'NT-';
 const ESTADOS = ['recibido', 'en-diagnostico', 'en-reparacion', 'reparado', 'entregado'];
+
+let ordenPendiente = null; // { orden, numero } — encontrada pero sin verificar el DNI todavía
 
 function estadoLabel(estado) {
   const labels = {
@@ -27,6 +38,10 @@ function formatNumber(n) {
   return ORDEN_PREFIX + String(n).padStart(4, '0');
 }
 
+function soloDigitos(str) {
+  return String(str || '').replace(/\D/g, '');
+}
+
 async function buscarOrden() {
   const inputEl = document.getElementById('trackInput');
   const btn = document.getElementById('btnBuscarOrden');
@@ -35,14 +50,19 @@ async function buscarOrden() {
   const notFound = document.getElementById('trackNotFound');
   const found = document.getElementById('trackFound');
   const loading = document.getElementById('trackLoading');
+  const dniStep = document.getElementById('trackDniStep');
+  const dniError = document.getElementById('trackDniError');
 
   empty.style.display = 'none';
   notFound.style.display = 'none';
   found.style.display = 'none';
+  dniStep.style.display = 'none';
+  dniError.style.display = 'none';
+  ordenPendiente = null;
 
   if (!input) { empty.style.display = 'block'; return; }
 
-  let num = input.replace(ORDEN_PREFIX, '');
+  const num = input.replace(ORDEN_PREFIX, '');
   const numParsed = parseInt(num, 10);
 
   if (isNaN(numParsed) || numParsed <= 0) {
@@ -66,14 +86,45 @@ async function buscarOrden() {
     }
 
     const o = snap.data();
-    mostrarOrden(o, numParsed, found);
-    found.style.display = 'block';
+
+    // Si la orden no tiene DNI cargado (se cargó antes de tener este campo,
+    // o el cliente no lo dejó), no hay nada contra qué verificar: mostramos directo.
+    if (!o.dni || !soloDigitos(o.dni)) {
+      mostrarOrden(o, numParsed, found);
+      found.style.display = 'block';
+      return;
+    }
+
+    ordenPendiente = { orden: o, numero: numParsed };
+    document.getElementById('trackDniInput').value = '';
+    dniStep.style.display = 'block';
+    document.getElementById('trackDniInput').focus();
   } catch (e) {
     console.error('Error buscando la orden:', e);
     loading.style.display = 'none';
     btn.disabled = false;
     notFound.style.display = 'block';
   }
+}
+
+function verificarDni() {
+  const dniInput = document.getElementById('trackDniInput').value;
+  const dniError = document.getElementById('trackDniError');
+  const found = document.getElementById('trackFound');
+  const dniStep = document.getElementById('trackDniStep');
+
+  if (!ordenPendiente) return;
+
+  if (soloDigitos(dniInput) !== soloDigitos(ordenPendiente.orden.dni)) {
+    dniError.style.display = 'block';
+    return;
+  }
+
+  dniError.style.display = 'none';
+  dniStep.style.display = 'none';
+  mostrarOrden(ordenPendiente.orden, ordenPendiente.numero, found);
+  found.style.display = 'block';
+  ordenPendiente = null;
 }
 
 function mostrarOrden(o, numero, found) {
@@ -153,3 +204,4 @@ function escapeHTML(str) {
 }
 
 window.buscarOrden = buscarOrden;
+window.verificarDni = verificarDni;
