@@ -170,6 +170,7 @@ nav {
   line-height: 1.0;
   letter-spacing: -0.03em;
   margin-bottom: 1.5rem;
+  overflow-wrap: break-word;
   animation: fadeUp 0.6s 0.1s ease both;
 }
 
@@ -751,7 +752,11 @@ footer a { color: inherit; }
   nav { padding: 1rem 1.5rem; }
   .nav-links { display: none; }
   section { padding: 4rem 1.5rem; }
-  .hero { padding: 0 1.5rem; }
+  .hero {
+    min-height: auto;
+    padding: 7.5rem 1.5rem 3.5rem;
+  }
+  .hero h1 { font-size: clamp(2.3rem, 11vw, 3.4rem); }
   .divider { margin: 0 1.5rem; }
   .contact-grid { grid-template-columns: 1fr; gap: 2rem; }
   footer { padding: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
