@@ -92,6 +92,11 @@ nav {
 
 .nav-links a:hover { color: var(--accent); }
 
+.nav-instagram {
+  font-size: 1.1rem !important;
+  line-height: 1;
+}
+
 /* ── HERO ── */
 .hero {
   min-height: 100vh;
