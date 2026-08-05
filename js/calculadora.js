@@ -3,6 +3,14 @@
 // ══════════════════════════════════════════════
 // Lee el catálogo de precios desde Firestore (colección "catalogo").
 // El catálogo se administra únicamente desde admin.html.
+//
+// Orden de selección: Reparación → Marca → Modelo.
+// Va primero la reparación porque el mismo modelo de celular puede
+// no existir con el mismo nombre en todas las categorías (ej: una
+// batería puede cubrir 6 modelos agrupados en un solo renglón, pero
+// el módulo/pantalla es específico por modelo). Filtrando por
+// reparación primero, marca y modelo siempre muestran únicamente
+// combinaciones que sí tienen precio cargado.
 
 import { db } from './firebase-config.js';
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
@@ -14,6 +22,7 @@ async function cargarCatalogo() {
   const empty = document.getElementById('emptyState');
   const loading = document.getElementById('calcLoading');
   const stepsBox = document.getElementById('calcSteps');
+  const selTipo = document.getElementById('sel-tipo');
 
   loading.style.display = 'block';
   empty.style.display = 'none';
@@ -40,75 +49,72 @@ async function cargarCatalogo() {
   if (itemsData.length === 0) {
     empty.textContent = '⚠️ Todavía no hay precios cargados. Escribinos por WhatsApp y te cotizamos al toque.';
     empty.style.display = 'block';
-    document.getElementById('sel-marca').disabled = true;
+    selTipo.disabled = true;
     return;
   }
 
-  poblarMarcas();
+  poblarTipos();
 }
 
-function poblarMarcas() {
-  const sel = document.getElementById('sel-marca');
-  const marcas = [...new Set(itemsData.map(i => i.marca))].sort();
-  sel.innerHTML = '<option value="">— Elegí tu marca —</option>';
-  marcas.forEach(m => sel.innerHTML += `<option value="${m}">${m}</option>`);
+function poblarTipos() {
+  const sel = document.getElementById('sel-tipo');
+  const tiposDisponibles = [...new Set(itemsData.map(i => i.tipo))];
+  sel.innerHTML = '<option value="">— Elegí qué arreglar —</option>' +
+    tiposDisponibles
+      .filter(t => TIPOS[t])
+      .map(t => `<option value="${t}">${TIPOS[t].icon} ${TIPOS[t].label}</option>`)
+      .join('');
   sel.disabled = false;
-  resetDependientes();
+  resetDependientesDesdeTipo();
   resetResultado();
 }
 
-function resetDependientes() {
-  const selM = document.getElementById('sel-modelo');
-  const selR = document.getElementById('sel-rep');
-  selM.innerHTML = '<option value="">— Primero elegí marca —</option>';
+function resetDependientesDesdeTipo() {
+  const selM = document.getElementById('sel-marca');
+  const selMo = document.getElementById('sel-modelo');
+  selM.innerHTML = '<option value="">— Primero elegí reparación —</option>';
   selM.disabled = true;
-  selR.innerHTML = '<option value="">— Primero elegí modelo —</option>';
-  selR.disabled = true;
+  selMo.innerHTML = '<option value="">— Primero elegí marca —</option>';
+  selMo.disabled = true;
 }
 
-function filtrarModelos() {
-  const marca = document.getElementById('sel-marca').value;
-  const selM = document.getElementById('sel-modelo');
-  const selR = document.getElementById('sel-rep');
-  selR.innerHTML = '<option value="">— Primero elegí modelo —</option>';
-  selR.disabled = true;
+function filtrarMarcas() {
+  const tipo = document.getElementById('sel-tipo').value;
+  const selM = document.getElementById('sel-marca');
+  const selMo = document.getElementById('sel-modelo');
+  selMo.innerHTML = '<option value="">— Primero elegí marca —</option>';
+  selMo.disabled = true;
   resetResultado();
 
-  if (!marca) { selM.innerHTML = '<option value="">— Primero elegí marca —</option>'; selM.disabled = true; return; }
+  if (!tipo) { selM.innerHTML = '<option value="">— Primero elegí reparación —</option>'; selM.disabled = true; return; }
 
-  const modelos = [...new Set(itemsData.filter(i => i.marca === marca).map(i => i.modelo))].sort();
-  selM.innerHTML = '<option value="">— Elegí el modelo —</option>';
-  modelos.forEach(m => selM.innerHTML += `<option value="${m}">${m}</option>`);
+  const marcas = [...new Set(itemsData.filter(i => i.tipo === tipo).map(i => i.marca))].sort();
+  selM.innerHTML = '<option value="">— Elegí tu marca —</option>' + marcas.map(m => `<option value="${m}">${m}</option>`).join('');
   selM.disabled = false;
 }
 
-function filtrarReparaciones() {
+function filtrarModelos() {
+  const tipo = document.getElementById('sel-tipo').value;
   const marca = document.getElementById('sel-marca').value;
-  const modelo = document.getElementById('sel-modelo').value;
-  const selR = document.getElementById('sel-rep');
+  const selMo = document.getElementById('sel-modelo');
   resetResultado();
 
-  if (!modelo) { selR.innerHTML = '<option value="">— Primero elegí modelo —</option>'; selR.disabled = true; return; }
+  if (!marca) { selMo.innerHTML = '<option value="">— Primero elegí marca —</option>'; selMo.disabled = true; return; }
 
-  const reps = itemsData.filter(i => i.marca === marca && i.modelo === modelo);
-  selR.innerHTML = '<option value="">— Elegí qué querés arreglar —</option>';
-  reps.forEach(r => {
-    const t = TIPOS[r.tipo];
-    if (!t) return;
-    selR.innerHTML += `<option value="${r.tipo}">${t.icon} ${t.label}</option>`;
-  });
-  selR.disabled = false;
+  const modelos = [...new Set(itemsData.filter(i => i.tipo === tipo && i.marca === marca).map(i => i.modelo))].sort();
+  selMo.innerHTML = '<option value="">— Elegí el modelo —</option>' + modelos.map(m => `<option value="${m}">${m}</option>`).join('');
+  selMo.disabled = false;
 }
 
 function mostrarPrecio() {
+  const tipo = document.getElementById('sel-tipo').value;
   const marca = document.getElementById('sel-marca').value;
   const modelo = document.getElementById('sel-modelo').value;
-  const tipo = document.getElementById('sel-rep').value;
 
   resetResultado();
-  if (!tipo) return;
+  if (!modelo) return;
 
-  const item = itemsData.find(i => i.marca === marca && i.modelo === modelo && i.tipo === tipo);
+  const item = itemsData.find(i => i.tipo === tipo && i.marca === marca && i.modelo === modelo);
   const empty = document.getElementById('emptyState');
   const result = document.getElementById('resultadoCliente');
   const nodata = document.getElementById('sinDatos');
@@ -133,14 +139,14 @@ function mostrarPrecio() {
 
 function resetResultado() {
   const empty = document.getElementById('emptyState');
-  empty.textContent = 'Elegí marca, modelo y reparación para ver el precio.';
+  empty.textContent = 'Elegí reparación, marca y modelo para ver el precio.';
   empty.style.display = 'block';
   document.getElementById('resultadoCliente').style.display = 'none';
   document.getElementById('sinDatos').style.display = 'none';
 }
 
+window.filtrarMarcas = filtrarMarcas;
 window.filtrarModelos = filtrarModelos;
-window.filtrarReparaciones = filtrarReparaciones;
 window.mostrarPrecio = mostrarPrecio;
 
 window.addEventListener('DOMContentLoaded', cargarCatalogo);

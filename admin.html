@@ -128,6 +128,7 @@
             <option value="">— Elegí una marca primero —</option>
           </select>
           <textarea id="nuevoModeloInput" placeholder="Pegá uno o varios modelos, separados por coma o por &quot;/&quot;. Ej: A02S / A03 / A03S / A04E" style="margin-top:0.5rem;min-height:60px;"></textarea>
+          <p style="font-size:0.75rem;color:var(--muted);margin-top:0.4rem;line-height:1.5;">El "/" separa modelos (ej: pegar "A02/A12/M12" registra 3 modelos distintos). Si en algún modelo el "/" es parte del nombre y no un separador, reemplazalo por otro símbolo antes de pegar.</p>
           <button class="btn-new-order" style="margin-top:0.5rem;" onclick="agregarModelo()">+ Agregar modelo(s)</button>
           <div id="modelosListContainer" class="chip-list"></div>
         </div>
@@ -136,6 +137,15 @@
       <div class="modal-section-label" style="margin:1.5rem 0 0.5rem;">3. Cargar precio</div>
       <div class="catalog-add-form">
         <input type="hidden" id="catEditId"/>
+        <div class="form-group">
+          <label>Reparación</label>
+          <select id="catTipo">
+            <option value="">— Elegí —</option>
+            <option value="modulo">📱 Módulo/Pantalla</option>
+            <option value="bateria">🔋 Batería</option>
+            <option value="carga">🔌 Puerto de carga</option>
+          </select>
+        </div>
         <div class="form-group">
           <label>Marca</label>
           <select id="catMarcaSel" onchange="onCatMarcaChange()">
@@ -149,15 +159,6 @@
           </div>
         </div>
         <div class="form-group">
-          <label>Reparación</label>
-          <select id="catTipo">
-            <option value="">— Elegí —</option>
-            <option value="modulo">📱 Módulo/Pantalla</option>
-            <option value="bateria">🔋 Batería</option>
-            <option value="carga">🔌 Puerto de carga</option>
-          </select>
-        </div>
-        <div class="form-group">
           <label>Costo base ($)</label>
           <input type="number" id="catCosto" placeholder="0"/>
         </div>
@@ -167,12 +168,46 @@
         </div>
       </div>
 
+      <div class="modal-section-label" style="margin:1.5rem 0 0.5rem;">4. Importación masiva (pegar lista completa)</div>
+      <div class="catalog-intro" style="margin-bottom:0.9rem;">
+        Pegá varios renglones copiados de tu planilla, con el formato <strong>Modelo/Descripción</strong> seguido del precio (con "$"). Se usa la <strong>misma marca y tipo de reparación</strong> para toda la lista. Si la marca no existe todavía, agregala primero en el paso 1.
+        <br><br>
+        ⚠️ <strong>Ahora el "/" SÍ separa modelos</strong>: un renglón como <code>12 / 12 Pro&nbsp;&nbsp;$122.000</code> carga 2 productos con el mismo precio. Ojo con las siglas que usan "/" sin separar modelos (ej: <code>S/IC</code>, <code>C/IC</code>) — revisá esos renglones antes de pegar y reemplazá la sigla por algo sin barra (ej: <code>S-IC</code>) para que no se corte mal.
+      </div>
+      <div class="catalog-add-form" style="grid-template-columns: 1fr 1fr;">
+        <div class="form-group">
+          <label>Reparación (para toda la lista)</label>
+          <select id="bulkTipoSel">
+            <option value="">— Elegí —</option>
+            <option value="modulo">📱 Módulo/Pantalla</option>
+            <option value="bateria">🔋 Batería</option>
+            <option value="carga">🔌 Puerto de carga</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Marca</label>
+          <select id="bulkMarcaSel"><option value="">— Elegí —</option></select>
+        </div>
+      </div>
+      <textarea id="bulkImportInput" style="width:100%;min-height:160px;margin-top:0.75rem;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:0.75rem;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:0.85rem;" placeholder="14 Pro Max Auto-Programable JCID Oled&#9;$205.000
+16 Original&#9;$470.000
+17 Pro Ampsentrix Soft Oled (120Hz)&#9;$245.000"></textarea>
+      <label style="display:flex;align-items:center;gap:0.5rem;margin-top:0.75rem;font-size:0.82rem;color:var(--text);text-transform:none;letter-spacing:0;">
+        <input type="checkbox" id="bulkReplaceCheckbox" style="width:auto;"/>
+        🔁 Antes de importar, borrar todos los precios que ya existan de esta <strong>marca + tipo de reparación</strong> (para actualizar una lista completa sin dejar precios viejos dando vueltas)
+      </label>
+      <div style="display:flex;gap:1rem;align-items:center;margin-top:0.75rem;">
+        <button class="btn-new-order" onclick="importarMasivo()">⬆ Importar lista</button>
+        <span id="bulkImportResult" style="font-size:0.82rem;color:var(--muted);"></span>
+      </div>
+
       <div class="table-toolbar" style="margin-top:1.5rem;">
         <div class="toolbar-left">
           <input class="search-box" type="text" id="catalogSearch" placeholder="Buscar marca o modelo…" oninput="renderCatalogo()"/>
         </div>
         <div class="toolbar-right">
           <button class="btn-seed" onclick="cargarCatalogoBase()">✨ Cargar catálogo base de ejemplo</button>
+          <button class="btn-export" style="border-color:var(--danger);color:var(--danger);" onclick="vaciarCatalogoCompleto()">🗑️ Vaciar TODO el catálogo</button>
         </div>
       </div>
 

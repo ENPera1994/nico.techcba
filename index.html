@@ -107,34 +107,34 @@
 
     <div class="calc-help">
       <div class="calc-help-icon">💡</div>
-      <p>Es fácil: elegí la <strong>marca</strong> de tu celular, después el <strong>modelo</strong> y por último qué querés arreglar. En segundos vas a ver el precio estimado y un botón para confirmar por WhatsApp.</p>
+      <p>Es fácil: elegí primero <strong>qué querés arreglar</strong>, después la <strong>marca</strong> de tu celular y por último el <strong>modelo</strong>. En segundos vas a ver el precio estimado y un botón para confirmar por WhatsApp. <strong>¿Tenés un iPhone?</strong> Escribinos directo por <a href="https://wa.me/5493512836584" target="_blank" style="color:var(--accent);">WhatsApp</a> para cotizarlo — no usamos la calculadora para esa marca.</p>
     </div>
 
     <div class="calc-box">
       <div class="calc-steps" id="calcSteps">
         <div class="calc-step">
-          <div class="calc-step-label"><span class="calc-step-num">1</span> Marca</div>
+          <div class="calc-step-label"><span class="calc-step-num">1</span> Reparación</div>
+          <select id="sel-tipo" onchange="filtrarMarcas()" disabled>
+            <option value="">— Cargando… —</option>
+          </select>
+        </div>
+        <div class="calc-step">
+          <div class="calc-step-label"><span class="calc-step-num">2</span> Marca</div>
           <select id="sel-marca" onchange="filtrarModelos()" disabled>
-            <option value="">— Cargando marcas… —</option>
+            <option value="">— Primero elegí reparación —</option>
           </select>
         </div>
         <div class="calc-step">
-          <div class="calc-step-label"><span class="calc-step-num">2</span> Modelo</div>
-          <select id="sel-modelo" onchange="filtrarReparaciones()" disabled>
+          <div class="calc-step-label"><span class="calc-step-num">3</span> Modelo</div>
+          <select id="sel-modelo" onchange="mostrarPrecio()" disabled>
             <option value="">— Primero elegí marca —</option>
-          </select>
-        </div>
-        <div class="calc-step">
-          <div class="calc-step-label"><span class="calc-step-num">3</span> Reparación</div>
-          <select id="sel-rep" onchange="mostrarPrecio()" disabled>
-            <option value="">— Primero elegí modelo —</option>
           </select>
         </div>
       </div>
 
       <div class="calc-results">
         <div class="calc-loading" id="calcLoading" style="display:none;">⏳ Cargando lista de precios…</div>
-        <div class="calc-empty" id="emptyState">Elegí marca, modelo y reparación para ver el precio.</div>
+        <div class="calc-empty" id="emptyState">Elegí reparación, marca y modelo para ver el precio.</div>
         <div id="resultadoCliente" style="display:none;padding:2rem;text-align:center;">
           <div style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.8rem;">Precio estimado de la reparación</div>
           <div id="precioMostrado" style="font-family:'Syne',sans-serif;font-size:3rem;font-weight:800;color:var(--accent);letter-spacing:-0.02em;"></div>

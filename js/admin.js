@@ -450,7 +450,7 @@ function renderMarcas() {
     ? marcas.map(m => `<span class="chip">${escapeHTML(m.nombre)}<button onclick="eliminarMarca('${m.id}')" title="Eliminar">×</button></span>`).join('')
     : '<span class="chip-empty">Todavía no cargaste ninguna marca.</span>';
 
-  ['modeloMarcaSel', 'catMarcaSel'].forEach(selId => {
+  ['modeloMarcaSel', 'catMarcaSel', 'bulkMarcaSel'].forEach(selId => {
     const sel = document.getElementById(selId);
     const actual = sel.value;
     sel.innerHTML = '<option value="">— Elegí una marca —</option>' +
@@ -645,7 +645,110 @@ async function eliminarCatalogo(id) {
   }
 }
 
-// Carga inicial opcional: un catálogo base de equipos Android comunes,
+// ── IMPORTACIÓN MASIVA (pegar lista con Modelo + $Precio) ──
+async function importarMasivo() {
+  const marca = document.getElementById('bulkMarcaSel').value;
+  const tipo = document.getElementById('bulkTipoSel').value;
+  const raw = document.getElementById('bulkImportInput').value;
+  const resultEl = document.getElementById('bulkImportResult');
+
+  if (!marca || !tipo) {
+    alert('Elegí la marca y el tipo de reparación para toda la lista antes de importar.');
+    return;
+  }
+
+  const lineas = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  if (lineas.length === 0) {
+    alert('Pegá al menos un renglón con "Modelo   $Precio".');
+    return;
+  }
+
+  const items = [];
+  const errores = [];
+  lineas.forEach((linea, i) => {
+    // Acepta "Modelo <tab o espacios> $1.234.567" en cualquier separador antes del $
+    const m = linea.match(/^(.+?)\s*\$\s*([\d.,]+)\s*$/);
+    if (!m) { errores.push(`Renglón ${i + 1}: no se entendió "${linea}"`); return; }
+    const costoBase = parseInt(m[2].replace(/[.,]/g, ''), 10);
+    if (isNaN(costoBase) || costoBase <= 0) { errores.push(`Renglón ${i + 1}: precio inválido en "${linea}"`); return; }
+
+    // El "/" separa varios modelos que comparten el mismo precio (ej: "12 / 12 Pro").
+    const modelosDelRenglon = m[1].split('/').map(s => s.trim()).filter(Boolean);
+    if (modelosDelRenglon.length === 0) { errores.push(`Renglón ${i + 1}: no se encontró ningún modelo en "${linea}"`); return; }
+    modelosDelRenglon.forEach(modelo => items.push({ modelo, costoBase }));
+  });
+
+  if (items.length === 0) {
+    resultEl.style.color = 'var(--danger)';
+    resultEl.textContent = 'No se pudo leer ningún renglón. Revisá que cada línea termine en "$número".';
+    return;
+  }
+
+  resultEl.style.color = 'var(--muted)';
+  resultEl.textContent = `Importando ${items.length} ítems…`;
+
+  try {
+    const CHUNK = 200;
+
+    // Si está tildado "reemplazar": borrar antes los precios existentes de esta marca+tipo.
+    const reemplazar = document.getElementById('bulkReplaceCheckbox').checked;
+    if (reemplazar) {
+      const aBorrar = catalogo.filter(c => c.marca === marca && c.tipo === tipo);
+      for (let i = 0; i < aBorrar.length; i += CHUNK) {
+        const delBatch = writeBatch(db);
+        aBorrar.slice(i, i + CHUNK).forEach(item => delBatch.delete(doc(db, 'catalogo', item.id)));
+        await delBatch.commit();
+      }
+    }
+
+    // Firestore permite hasta 500 operaciones por batch; acá van 2 por ítem (modelo + catálogo).
+    for (let i = 0; i < items.length; i += CHUNK) {
+      const batch = writeBatch(db);
+      items.slice(i, i + CHUNK).forEach(({ modelo, costoBase }) => {
+        const modId = slugSimple(marca + '-' + modelo);
+        batch.set(doc(db, 'modelos', modId), { marca, modelo });
+        const catId = slugCatalogo(marca, modelo, tipo);
+        batch.set(doc(db, 'catalogo', catId), { marca, modelo, tipo, costoBase, activo: true });
+      });
+      await batch.commit();
+    }
+
+    resultEl.style.color = '#4ade80';
+    resultEl.textContent = `✅ Se importaron ${items.length} ítems${reemplazar ? ' (reemplazando los anteriores de esta marca+tipo)' : ''}.` + (errores.length ? ` (${errores.length} renglones no se pudieron leer, ver consola)` : '');
+    if (errores.length) console.warn('Renglones no importados:\n' + errores.join('\n'));
+    document.getElementById('bulkImportInput').value = '';
+  } catch (e) {
+    console.error(e);
+    resultEl.style.color = 'var(--danger)';
+    resultEl.textContent = 'Error al importar. Revisá la consola (F12).';
+  }
+}
+
+// ── VACIADO TOTAL DEL CATÁLOGO (todas las marcas y tipos) ──
+async function vaciarCatalogoCompleto() {
+  if (catalogo.length === 0) { alert('El catálogo ya está vacío.'); return; }
+
+  const primeraConfirmacion = confirm(`Esto va a borrar los ${catalogo.length} precios cargados (de TODAS las marcas). Las marcas y modelos que ya registraste NO se borran, solo los precios. ¿Continuar?`);
+  if (!primeraConfirmacion) return;
+
+  const segundaConfirmacion = prompt('Para confirmar, escribí BORRAR (en mayúsculas) y aceptá:');
+  if (segundaConfirmacion !== 'BORRAR') { alert('Cancelado, no se borró nada.'); return; }
+
+  try {
+    const CHUNK = 200;
+    for (let i = 0; i < catalogo.length; i += CHUNK) {
+      const batch = writeBatch(db);
+      catalogo.slice(i, i + CHUNK).forEach(item => batch.delete(doc(db, 'catalogo', item.id)));
+      await batch.commit();
+    }
+    alert('Catálogo de precios vaciado. Las marcas y modelos siguen intactos para volver a importar.');
+  } catch (e) {
+    console.error(e);
+    alert('No se pudo vaciar el catálogo. Revisá la consola (F12).');
+  }
+}
+
+
 // para no tener que tipear todo a mano la primera vez.
 const SEED_DATA = [
   { marca: 'Samsung', modelo: 'A14', tipo: 'modulo', costoBase: 12000 },
@@ -708,5 +811,5 @@ Object.assign(window, {
   guardarCatalogoItem, editarCatalogo, cancelarEdicionCatalogo,
   eliminarCatalogo, renderCatalogo, cargarCatalogoBase,
   agregarMarca, eliminarMarca, agregarModelo, eliminarModelo,
-  renderModelosManage, onCatMarcaChange
+  renderModelosManage, onCatMarcaChange, importarMasivo
 });
