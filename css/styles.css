@@ -99,7 +99,7 @@ nav {
 
 /* ── HERO ── */
 .hero {
-  min-height: 100vh;
+  min-height: clamp(560px, 85vh, 880px);
   display: flex;
   align-items: center;
   padding: 0 4rem;
@@ -765,4 +765,12 @@ footer a { color: inherit; }
   .timeline-line { width: 2px; height: 20px; margin: 0 0 0 6px; }
   .calc-steps { flex-direction: column; }
   .circuit-decor { display: none; }
+}
+
+/* Celulares angostos: tope de letra más chico para que "Reparaciones"
+   siempre entre en una sola línea, sin depender solo de %vw */
+@media (max-width: 480px) {
+  .hero { padding: 6.5rem 1.25rem 3rem; }
+  .hero h1 { font-size: clamp(2rem, 10vw, 2.8rem); }
+  .hero p { font-size: 1rem; }
 }
