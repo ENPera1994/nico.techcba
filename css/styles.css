@@ -767,10 +767,15 @@ footer a { color: inherit; }
   .circuit-decor { display: none; }
 }
 
-/* Celulares angostos: tope de letra más chico para que "Reparaciones"
-   siempre entre en una sola línea, sin depender solo de %vw */
+/* Celulares angostos: tamaño fijo (no % del ancho) para que "Reparaciones"
+   entre siempre en una sola línea con margen de sobra, sin importar
+   la fuente ancha que usamos (Syne). */
 @media (max-width: 480px) {
   .hero { padding: 6.5rem 1.25rem 3rem; }
-  .hero h1 { font-size: clamp(2rem, 10vw, 2.8rem); }
+  .hero h1 { font-size: 2rem; }
   .hero p { font-size: 1rem; }
+}
+
+@media (max-width: 380px) {
+  .hero h1 { font-size: 1.75rem; }
 }
